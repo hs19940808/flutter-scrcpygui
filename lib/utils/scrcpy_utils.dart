@@ -37,10 +37,34 @@ class ScrcpyUtils {
   static Future<void> pingRunning(WidgetRef ref) async {
     final running = ref.read(scrcpyInstanceProvider);
     final actual = await getRunningScrcpy(ref.read(appPidProvider));
+    final stopped =
+        running.where((inst) => !actual.contains(inst.scrcpyPID)).toList();
 
-    for (final inst in running) {
-      if (!actual.contains(inst.scrcpyPID)) {
-        ref.read(scrcpyInstanceProvider.notifier).removeInstance(inst);
+    for (final inst in stopped) {
+      ref.read(scrcpyInstanceProvider.notifier).removeInstance(inst);
+    }
+
+    final remaining = ref.read(scrcpyInstanceProvider);
+    final devicesToWake = stopped
+        .where((inst) =>
+            inst.config.deviceOptions.turnOffDisplay &&
+            !inst.config.deviceOptions.offScreenOnClose &&
+            remaining.every((other) => other.device.id != inst.device.id))
+        .map((inst) => inst.device.id)
+        .toSet();
+
+    for (final deviceId in devicesToWake) {
+      final instance = stopped.firstWhere((inst) => inst.device.id == deviceId);
+      try {
+        final result = await instance.device.sendKeyEvent(
+          ref.read(execDirProvider),
+          'KEYCODE_WAKEUP',
+        );
+        if (result.exitCode != 0) {
+          logger.w('Failed to wake device $deviceId: ${result.stderr}');
+        }
+      } on Exception catch (error) {
+        logger.w('Failed to wake device $deviceId: $error');
       }
     }
   }

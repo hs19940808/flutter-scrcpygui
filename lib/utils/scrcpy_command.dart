@@ -228,7 +228,11 @@ class ScrcpyCommand {
   }
 
   static String _screenOffOnExit(ScrcpyConfig config) {
-    return config.deviceOptions.offScreenOnClose ? ' --power-off-on-close' : '';
+    // Do not let one instance restore the display while another is running.
+    return config.deviceOptions.offScreenOnClose ||
+            config.deviceOptions.turnOffDisplay
+        ? ' --power-off-on-close'
+        : '';
   }
 
   //window options
