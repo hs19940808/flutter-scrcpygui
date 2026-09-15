@@ -14,7 +14,7 @@ import '../../../../../providers/device_info_provider.dart';
 import '../../../../../providers/version_provider.dart';
 import '../../../../../utils/adb_utils.dart';
 import '../../../../../utils/const.dart';
-import 'app_grid.dart';
+import 'frequent_apps.dart';
 import 'instance_manager.dart';
 
 final FocusNode searchBoxFocusNode = FocusNode();
@@ -103,7 +103,7 @@ class _BigControlPage2State extends ConsumerState<BigControlPage2> {
               ),
             ),
             RightColumn(
-                shouldAlign: false, flex: 5, child: AppGrid(device: device)),
+                shouldAlign: false, flex: 5, child: AppLauncher(device: device)),
           ],
         ),
       );

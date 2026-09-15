@@ -8,6 +8,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:scrcpygui/models/scrcpy_related/scrcpy_config/position_and_size.dart';
 import 'package:scrcpygui/providers/automation_provider.dart';
+import 'package:scrcpygui/providers/app_usage_provider.dart';
 import 'package:scrcpygui/providers/device_info_provider.dart';
 import 'package:scrcpygui/providers/settings_provider.dart';
 import 'package:scrcpygui/utils/app_utils.dart';
@@ -203,6 +204,16 @@ class ScrcpyUtils {
 
     ref.read(scrcpyInstanceProvider.notifier).addInstance(inst);
     ref.read(pauseAutoLaunchProvider.notifier).state = false;
+    final app = inst.config.appOptions.selectedApp;
+    if (!isTest && app != null) {
+      try {
+        await ref.read(appUsageProvider.notifier)
+            .record(device.serialNo, app.packageName);
+      } catch (error, stack) {
+        logger.e('Unable to save app launch history',
+            error: error, stackTrace: stack);
+      }
+    }
   }
 
   static Future<void> killServer(ScrcpyRunningInstance instance,

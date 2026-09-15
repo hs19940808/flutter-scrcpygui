@@ -9,7 +9,7 @@ import 'package:localization/localization.dart';
 import 'package:scrcpygui/db/db.dart';
 import 'package:scrcpygui/providers/device_info_provider.dart';
 import 'package:scrcpygui/providers/version_provider.dart';
-import 'package:scrcpygui/screens/1.home_tab/sub_page/device_control/widgets/app_grid.dart';
+import 'frequent_apps.dart';
 import 'package:scrcpygui/screens/1.home_tab/sub_page/device_control/widgets/control_buttons.dart';
 import 'package:scrcpygui/utils/adb_utils.dart';
 import 'package:shadcn_flutter/shadcn_flutter.dart';
@@ -96,7 +96,7 @@ class _SmallControlPageState extends ConsumerState<SmallControlPage> {
         else
           Expanded(
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: sectionWidth),
+              constraints: BoxConstraints(maxWidth: sectionWidth + 140),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
@@ -104,7 +104,7 @@ class _SmallControlPageState extends ConsumerState<SmallControlPage> {
                   CollapsingControlButtons(
                       device: device, scrollController: scrollController),
                   Expanded(
-                    child: AppGrid(
+                    child: AppLauncher(
                       device: device,
                       scrollController: scrollController,
                     ),
