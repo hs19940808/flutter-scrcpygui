@@ -6,11 +6,13 @@ import 'package:scrcpygui/models/device_info_model.dart';
 import 'package:scrcpygui/models/scrcpy_related/scrcpy_config.dart';
 import 'package:scrcpygui/models/scrcpy_related/scrcpy_enum.dart';
 import 'package:scrcpygui/providers/device_info_provider.dart';
+import 'package:scrcpygui/providers/version_provider.dart';
 import 'package:scrcpygui/utils/const.dart';
 import 'package:scrcpygui/utils/extension.dart';
 import 'package:string_extensions/string_extensions.dart';
 
 class ScrcpyCommand {
+  /// 根据所选 Scrcpy 版本生成启动参数，兼容旧版并防止虚拟显示闲置休眠。
   static List<String> buildCommand(
       WidgetRef ref, ScrcpyConfig config, AdbDevices device,
       {String? customName}) {
@@ -60,6 +62,18 @@ class ScrcpyCommand {
         ];
 
     comm.removeWhere((e) => e.trim().isEmpty);
+
+    // --stay-awake 依赖接电；虚拟显示需要独立的用户活动保活。
+    final needsActivity = config.videoOptions.displayId == 'new' ||
+        config.deviceOptions.stayAwake;
+    final supportsKeepActive =
+        (ref.read(scrcpyVersionProvider).parseVersionToInt() ?? 0) >=
+            '4.0'.parseVersionToInt()!;
+    if (needsActivity &&
+        supportsKeepActive &&
+        !comm.contains('--keep-active')) {
+      comm.add('--keep-active');
+    }
 
     return comm;
   }
